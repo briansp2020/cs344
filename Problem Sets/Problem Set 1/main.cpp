@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
   //call the students' code
   your_rgba_to_greyscale(h_rgbaImage, d_rgbaImage, d_greyImage, numRows(), numCols());
   timer.Stop();
-  cudaDeviceSynchronize(); checkCudaErrors(cudaGetLastError());
+  hipDeviceSynchronize(); checkCudaErrors(hipGetLastError());
 
   int err = printf("Your code ran in: %f msecs.\n", timer.Elapsed());
 
@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
   }
 
   size_t numPixels = numRows()*numCols();
-  checkCudaErrors(cudaMemcpy(h_greyImage, d_greyImage, sizeof(unsigned char) * numPixels, cudaMemcpyDeviceToHost));
+  checkCudaErrors(hipMemcpy(h_greyImage, d_greyImage, sizeof(unsigned char) * numPixels, hipMemcpyDeviceToHost));
 
   //check results and output the grey image
   postProcess(output_file, h_greyImage);
