@@ -38,7 +38,7 @@
 #define BLOCK_DIM_Y 16
 
 __global__
-void rgba_to_greyscale(grid_launch_parm lp, const uchar4* const rgbaImage,
+void rgba_to_greyscale(hipLaunchParm lp, const uchar4* const rgbaImage,
                        unsigned char* const greyImage,
                        int numRows, int numCols)
 {
