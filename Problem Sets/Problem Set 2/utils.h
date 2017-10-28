@@ -3,9 +3,9 @@
 
 #include <iostream>
 #include <iomanip>
-#include <cuda.h>
-#include <cuda_runtime.h>
-#include <cuda_runtime_api.h>
+//#include <cuda.h>
+#include <hip/hip_runtime.h>
+#include <hip/hip_runtime_api.h>
 #include <cassert>
 #include <algorithm>
 
@@ -13,9 +13,9 @@
 
 template<typename T>
 void check(T err, const char* const func, const char* const file, const int line) {
-  if (err != cudaSuccess) {
+  if (err != hipSuccess) {
     std::cerr << "CUDA error at: " << file << ":" << line << std::endl;
-    std::cerr << cudaGetErrorString(err) << " " << func << std::endl;
+    std::cerr << hipGetErrorString(err) << " " << func << std::endl;
     exit(1);
   }
 }

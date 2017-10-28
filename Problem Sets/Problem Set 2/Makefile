@@ -1,4 +1,4 @@
-NVCC=nvcc
+HIPCC=hipcc
 
 ###################################
 # These are the default install   #
@@ -16,7 +16,8 @@ OPENCV_INCLUDEPATH=/usr/include
 #OPENCV_INCLUDEPATH=/usr/local/include
 
 OPENCV_LIBS=-lopencv_core -lopencv_imgproc -lopencv_highgui
-CUDA_INCLUDEPATH=/usr/local/cuda-5.0/include
+
+HIP_INCLUDEPATH=/opt/rocm/hcc/include
 
 ######################################################
 # On Macs the default install locations are below    #
@@ -25,24 +26,22 @@ CUDA_INCLUDEPATH=/usr/local/cuda-5.0/include
 #CUDA_INCLUDEPATH=/usr/local/cuda/include
 #CUDA_LIBPATH=/usr/local/cuda/lib
 
-NVCC_OPTS=-O3 -arch=sm_20 -Xcompiler -Wall -Xcompiler -Wextra -m64
-
-GCC_OPTS=-O3 -Wall -Wextra -m64
+HIPCC_OPTS=-O2 -hc -std=c++amp
 
 student: main.o student_func.o compare.o reference_calc.o Makefile
-	$(NVCC) -o HW2 main.o student_func.o compare.o reference_calc.o -L $(OPENCV_LIBPATH) $(OPENCV_LIBS) $(NVCC_OPTS)
+	$(HIPCC) -o HW2 main.o student_func.o compare.o reference_calc.o -L $(OPENCV_LIBPATH) $(OPENCV_LIBS) $(HIPCC_OPTS)
 
 main.o: main.cpp timer.h utils.h HW2.cpp
-	g++ -c main.cpp $(GCC_OPTS) -I $(OPENCV_INCLUDEPATH) -I $(CUDA_INCLUDEPATH)
+	$(HIPCC) -c main.cpp $(HIPCC_OPTS) -I $(HIP_INCLUDEPATH) -I $(OPENCV_INCLUDEPATH)
 
-student_func.o: student_func.cu reference_calc.cpp utils.h
-	nvcc -c student_func.cu $(NVCC_OPTS)
+student_func.o: student_func.cpp reference_calc.cpp utils.h
+	$(HIPCC) -c student_func.cpp $(HIPCC_OPTS)
 
 compare.o: compare.cpp compare.h
-	g++ -c compare.cpp -I $(OPENCV_INCLUDEPATH) $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+	$(HIPCC) -c compare.cpp -I $(OPENCV_INCLUDEPATH) $(HIPCC_OPTS)
 
 reference_calc.o: reference_calc.cpp reference_calc.h
-	g++ -c reference_calc.cpp -I $(OPENCV_INCLUDEPATH) $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+	$(HIPCC) -c reference_calc.cpp -I $(OPENCV_INCLUDEPATH) $(HIPCC_OPTS)
 
 clean:
 	rm -f *.o *.png hw

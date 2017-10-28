@@ -3,7 +3,7 @@
 #include <opencv2/opencv.hpp>
 #include "utils.h"
 #include <cuda.h>
-#include <cuda_runtime.h>
+#include <hip/hip_runtime.h>
 #include <string>
 
 cv::Mat imageInputRGBA;
@@ -31,7 +31,7 @@ void preProcess(uchar4 **h_inputImageRGBA, uchar4 **h_outputImageRGBA,
                 const std::string &filename) {
 
   //make sure the context initializes ok
-  checkCudaErrors(cudaFree(0));
+  checkCudaErrors(hipFree(0));
 
   cv::Mat image = cv::imread(filename.c_str(), CV_LOAD_IMAGE_COLOR);
   if (image.empty()) {
@@ -56,12 +56,12 @@ void preProcess(uchar4 **h_inputImageRGBA, uchar4 **h_outputImageRGBA,
 
   const size_t numPixels = numRows() * numCols();
   //allocate memory on the device for both input and output
-  checkCudaErrors(cudaMalloc(d_inputImageRGBA, sizeof(uchar4) * numPixels));
-  checkCudaErrors(cudaMalloc(d_outputImageRGBA, sizeof(uchar4) * numPixels));
-  checkCudaErrors(cudaMemset(*d_outputImageRGBA, 0, numPixels * sizeof(uchar4))); //make sure no memory is left laying around
+  checkCudaErrors(hipMalloc(d_inputImageRGBA, sizeof(uchar4) * numPixels));
+  checkCudaErrors(hipMalloc(d_outputImageRGBA, sizeof(uchar4) * numPixels));
+  checkCudaErrors(hipMemset(*d_outputImageRGBA, 0, numPixels * sizeof(uchar4))); //make sure no memory is left laying around
 
   //copy input array to the GPU
-  checkCudaErrors(cudaMemcpy(*d_inputImageRGBA, *h_inputImageRGBA, sizeof(uchar4) * numPixels, cudaMemcpyHostToDevice));
+  checkCudaErrors(hipMemcpy(*d_inputImageRGBA, *h_inputImageRGBA, sizeof(uchar4) * numPixels, hipMemcpyHostToDevice));
 
   d_inputImageRGBA__  = *d_inputImageRGBA;
   d_outputImageRGBA__ = *d_outputImageRGBA;
@@ -95,12 +95,12 @@ void preProcess(uchar4 **h_inputImageRGBA, uchar4 **h_outputImageRGBA,
   }
 
   //blurred
-  checkCudaErrors(cudaMalloc(d_redBlurred,    sizeof(unsigned char) * numPixels));
-  checkCudaErrors(cudaMalloc(d_greenBlurred,  sizeof(unsigned char) * numPixels));
-  checkCudaErrors(cudaMalloc(d_blueBlurred,   sizeof(unsigned char) * numPixels));
-  checkCudaErrors(cudaMemset(*d_redBlurred,   0, sizeof(unsigned char) * numPixels));
-  checkCudaErrors(cudaMemset(*d_greenBlurred, 0, sizeof(unsigned char) * numPixels));
-  checkCudaErrors(cudaMemset(*d_blueBlurred,  0, sizeof(unsigned char) * numPixels));
+  checkCudaErrors(hipMalloc(d_redBlurred,    sizeof(unsigned char) * numPixels));
+  checkCudaErrors(hipMalloc(d_greenBlurred,  sizeof(unsigned char) * numPixels));
+  checkCudaErrors(hipMalloc(d_blueBlurred,   sizeof(unsigned char) * numPixels));
+  checkCudaErrors(hipMemset(*d_redBlurred,   0, sizeof(unsigned char) * numPixels));
+  checkCudaErrors(hipMemset(*d_greenBlurred, 0, sizeof(unsigned char) * numPixels));
+  checkCudaErrors(hipMemset(*d_blueBlurred,  0, sizeof(unsigned char) * numPixels));
 }
 
 void postProcess(const std::string& output_file, uchar4* data_ptr) {
@@ -114,8 +114,8 @@ void postProcess(const std::string& output_file, uchar4* data_ptr) {
 
 void cleanUp(void)
 {
-  cudaFree(d_inputImageRGBA__);
-  cudaFree(d_outputImageRGBA__);
+  hipFree(d_inputImageRGBA__);
+  hipFree(d_outputImageRGBA__);
   delete[] h_filter__;
 }
 

@@ -1,40 +1,40 @@
 #ifndef GPU_TIMER_H__
 #define GPU_TIMER_H__
 
-#include <cuda_runtime.h>
+#include <hip/hip_runtime.h>
 
 struct GpuTimer
 {
-  cudaEvent_t start;
-  cudaEvent_t stop;
+  hipEvent_t start;
+  hipEvent_t stop;
 
   GpuTimer()
   {
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);
+    hipEventCreate(&start);
+    hipEventCreate(&stop);
   }
 
   ~GpuTimer()
   {
-    cudaEventDestroy(start);
-    cudaEventDestroy(stop);
+    hipEventDestroy(start);
+    hipEventDestroy(stop);
   }
 
   void Start()
   {
-    cudaEventRecord(start, 0);
+    hipEventRecord(start, 0);
   }
 
   void Stop()
   {
-    cudaEventRecord(stop, 0);
+    hipEventRecord(stop, 0);
   }
 
   float Elapsed()
   {
     float elapsed;
-    cudaEventSynchronize(stop);
-    cudaEventElapsedTime(&elapsed, start, stop);
+    hipEventSynchronize(stop);
+    hipEventElapsedTime(&elapsed, start, stop);
     return elapsed;
   }
 };
